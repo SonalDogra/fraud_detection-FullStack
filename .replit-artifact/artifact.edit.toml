@@ -1,0 +1,13 @@
+kind = "api"
+previewPath = "/"
+title = "FraudGuard AI Platform"
+version = "1.0.0"
+id = "fraud-detection"
+
+[[services]]
+localPort = 9000
+name = "FraudGuard AI Platform"
+paths = ["/"]
+
+[services.development]
+run = "cd artifacts/fraud-detection && mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=9000"

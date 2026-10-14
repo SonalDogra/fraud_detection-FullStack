@@ -1,0 +1,15 @@
+schemaVersion = 3
+
+[artifact]
+id = "fraud-detection"
+kind = "api"
+title = "FraudGuard AI Platform"
+
+[[services]]
+name = "web"
+localPort = 9000
+outputType = "webview"
+
+[[services.paths]]
+path = "/fraud-detection/"
+stripPrefix = false

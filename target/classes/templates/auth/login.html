@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign In')}"></head>
+<body class="login-page">
+<div class="login-card">
+    <div class="text-center mb-4">
+        <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:22px;">
+            <i class="bi bi-shield-fill-check"></i>
+        </div>
+        <h4 style="font-size:1.2rem;font-weight:700;color:var(--text-primary)">FraudGuard AI</h4>
+        <p style="font-size:0.78rem;color:var(--text-secondary)">Sign in to the investigation platform</p>
+    </div>
+
+    <div th:if="${error}" class="alert-custom alert-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${error}">Invalid credentials.</span>
+    </div>
+    <div th:if="${logout}" class="alert-custom alert-success">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${logout}">Signed out successfully.</span>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Username</label>
+            <input type="text" name="username" class="form-control-dark w-100"
+                   placeholder="admin or analyst" autocomplete="username" required/>
+        </div>
+        <div class="mb-4">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Password</label>
+            <input type="password" name="password" class="form-control-dark w-100"
+                   placeholder="••••••••" autocomplete="current-password" required/>
+        </div>
+        <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:10px;">
+            <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+    </form>
+
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+        <p style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-bottom:8px;">Demo credentials</p>
+        <div class="d-flex gap-2">
+            <div style="flex:1;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:10px;text-align:center;">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--accent-blue)">Admin</div>
+                <div style="font-size:0.68rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">admin / admin123</div>
+            </div>
+            <div style="flex:1;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:10px;text-align:center;">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--accent-green)">Analyst</div>
+                <div style="font-size:0.68rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">analyst / analyst123</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

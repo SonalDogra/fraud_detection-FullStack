@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('New Transaction')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Submit New Transaction</div>
+            <div class="topbar-breadcrumb">
+                <a th:href="@{/transactions}" style="color:var(--text-secondary);text-decoration:none;">Transactions</a>
+                &rsaquo; New
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div th:if="${error}" class="alert-custom alert-error"><i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span></div>
+
+        <form th:action="@{/transactions/new}" method="post">
+
+            <div class="row g-3">
+
+                <!-- Customer Details -->
+                <div class="col-lg-6">
+                    <div class="card-dark h-100">
+                        <div class="section-title">Customer Details</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="field-label">Full Name *</label>
+                                <input type="text" name="customerName" class="form-control-dark w-100"
+                                       placeholder="e.g. Priya Sharma" required th:value="${form?.customerName}"/>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Customer ID *</label>
+                                <input type="text" name="customerId" class="form-control-dark w-100"
+                                       placeholder="e.g. CUST-0042" required th:value="${form?.customerId}"/>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Email</label>
+                                <input type="email" name="customerEmail" class="form-control-dark w-100"
+                                       placeholder="customer@email.com" th:value="${form?.customerEmail}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant Details -->
+                <div class="col-lg-6">
+                    <div class="card-dark h-100">
+                        <div class="section-title">Merchant Details</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="field-label">Merchant Name *</label>
+                                <input type="text" name="merchantName" class="form-control-dark w-100"
+                                       placeholder="e.g. Amazon" required th:value="${form?.merchantName}"/>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Category *</label>
+                                <select name="merchantCategory" class="form-select-dark w-100" required>
+                                    <option value="">Select category</option>
+                                    <option value="E_COMMERCE">E-Commerce</option>
+                                    <option value="ENTERTAINMENT">Entertainment</option>
+                                    <option value="FOOD">Food &amp; Dining</option>
+                                    <option value="TRANSPORT">Transport</option>
+                                    <option value="TECHNOLOGY">Technology</option>
+                                    <option value="RETAIL">Retail</option>
+                                    <option value="GAMING">Gaming</option>
+                                    <option value="CRYPTO">Crypto Exchange</option>
+                                    <option value="WIRE_TRANSFER">Wire Transfer</option>
+                                    <option value="GAMBLING">Gambling</option>
+                                    <option value="MONEY_SERVICE">Money Service</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Merchant ID</label>
+                                <input type="text" name="merchantId" class="form-control-dark w-100"
+                                       placeholder="e.g. MER-0012" th:value="${form?.merchantId}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="col-lg-6">
+                    <div class="card-dark h-100">
+                        <div class="section-title">Transaction Details</div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="field-label">Amount *</label>
+                                <input type="number" name="amount" step="0.01" min="0.01" class="form-control-dark w-100"
+                                       placeholder="e.g. 75000.00" required th:value="${form?.amount}"/>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Currency *</label>
+                                <select name="currency" class="form-select-dark w-100" required>
+                                    <option value="INR">INR — Indian Rupee</option>
+                                    <option value="USD">USD — US Dollar</option>
+                                    <option value="GBP">GBP — British Pound</option>
+                                    <option value="EUR">EUR — Euro</option>
+                                    <option value="AED">AED — UAE Dirham</option>
+                                    <option value="SGD">SGD — Singapore Dollar</option>
+                                    <option value="BTC">BTC — Bitcoin</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Country *</label>
+                                <select name="country" class="form-select-dark w-100" required>
+                                    <option value="IN">IN — India</option>
+                                    <option value="US">US — United States</option>
+                                    <option value="GB">GB — United Kingdom</option>
+                                    <option value="AE">AE — UAE</option>
+                                    <option value="SG">SG — Singapore</option>
+                                    <option value="NG">NG — Nigeria</option>
+                                    <option value="RU">RU — Russia</option>
+                                    <option value="CN">CN — China</option>
+                                    <option value="BR">BR — Brazil</option>
+                                    <option value="KP">KP — North Korea</option>
+                                    <option value="IR">IR — Iran</option>
+                                    <option value="OTHER">OTHER</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">City</label>
+                                <input type="text" name="city" class="form-control-dark w-100"
+                                       placeholder="e.g. Mumbai" th:value="${form?.city}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device & Risk Flags -->
+                <div class="col-lg-6">
+                    <div class="card-dark h-100">
+                        <div class="section-title">Device &amp; Risk Flags</div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="field-label">IP Address</label>
+                                <input type="text" name="ipAddress" class="form-control-dark w-100"
+                                       placeholder="e.g. 203.45.12.99" th:value="${form?.ipAddress}"/>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Device Type</label>
+                                <select name="deviceType" class="form-select-dark w-100">
+                                    <option value="Mobile">Mobile</option>
+                                    <option value="Desktop">Desktop</option>
+                                    <option value="Tablet">Tablet</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">Browser</label>
+                                <select name="browser" class="form-select-dark w-100">
+                                    <option value="Chrome">Chrome</option>
+                                    <option value="Safari">Safari</option>
+                                    <option value="Firefox">Firefox</option>
+                                    <option value="Edge">Edge</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="field-label">OS</label>
+                                <select name="os" class="form-select-dark w-100">
+                                    <option value="Android">Android</option>
+                                    <option value="iOS">iOS</option>
+                                    <option value="Windows">Windows</option>
+                                    <option value="macOS">macOS</option>
+                                    <option value="Linux">Linux</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Risk flag checkboxes -->
+                        <div class="mt-3">
+                            <div class="section-title">Risk Indicators</div>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-size:0.82rem;">
+                                    <input type="checkbox" name="vpn" value="true" style="accent-color:var(--accent-blue);"/>
+                                    <span style="color:var(--text-secondary);">VPN / Proxy detected</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-size:0.82rem;">
+                                    <input type="checkbox" name="newDevice" value="true" style="accent-color:var(--accent-blue);"/>
+                                    <span style="color:var(--text-secondary);">New / Unrecognised device</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-size:0.82rem;">
+                                    <input type="checkbox" name="highRiskCountry" value="true" style="accent-color:var(--accent-blue);"/>
+                                    <span style="color:var(--text-secondary);">High-risk country</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-size:0.82rem;">
+                                    <input type="checkbox" name="foreignCurrency" value="true" style="accent-color:var(--accent-blue);"/>
+                                    <span style="color:var(--text-secondary);">Foreign / Unusual currency</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="cursor:pointer;font-size:0.82rem;">
+                                    <input type="checkbox" name="roundAmount" value="true" style="accent-color:var(--accent-blue);"/>
+                                    <span style="color:var(--text-secondary);">Suspiciously round amount</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12">
+                    <div class="card-dark" style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border-color:rgba(59,130,246,0.2);">
+                        <div class="d-flex align-items-center gap-4">
+                            <div>
+                                <div style="font-size:0.9rem;font-weight:700;color:var(--text-primary);">
+                                    <i class="bi bi-robot me-2 text-accent-blue"></i>AI Pipeline Ready
+                                </div>
+                                <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;">
+                                    Submitting will run this transaction through all 4 AI engines: Rule Intelligence → Behaviour Analysis → Device Trust → Risk Aggregation → AI Report
+                                </div>
+                            </div>
+                            <div class="ms-auto d-flex gap-2">
+                                <a th:href="@{/transactions}" class="btn-outline-custom">Cancel</a>
+                                <button type="submit" class="btn-primary-custom" style="padding:10px 28px;">
+                                    <i class="bi bi-lightning-charge-fill"></i> Analyse Transaction
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<style>
+.field-label { font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px; }
+</style>
+</body>
+</html>

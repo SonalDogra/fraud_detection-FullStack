@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Transactions')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Transactions</div>
+            <div class="topbar-breadcrumb">All processed transactions — click to investigate</div>
+        </div>
+        <div class="ms-auto">
+            <a th:href="@{/transactions/new}" class="btn-primary-custom">
+                <i class="bi bi-plus-lg"></i> New Transaction
+            </a>
+        </div>
+    </div>
+    <div class="page-content">
+        <div th:if="${success}" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span></div>
+
+        <!-- Filters -->
+        <div class="card-dark mb-4">
+            <form method="get" th:action="@{/transactions}" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <input type="text" name="search" th:value="${search}" class="form-control-dark w-100" placeholder="Search transaction, customer, merchant..."/>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select-dark w-100">
+                        <option value="">All Statuses</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${selectedStatus == s.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="riskLevel" class="form-select-dark w-100">
+                        <option value="">All Risk Levels</option>
+                        <option th:each="r : ${riskLevels}" th:value="${r}" th:text="${r}" th:selected="${selectedRiskLevel == r.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn-primary-custom w-100 justify-content-center">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/transactions}" class="btn-outline-custom w-100 justify-content-center">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="card-dark">
+            <div class="card-header-custom">
+                <div>
+                    <span class="card-title">Transaction List</span>
+                    <span class="card-subtitle ms-2" th:text="'(' + ${transactions.totalElements} + ' results)'"></span>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="table-dark-custom">
+                    <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Customer</th>
+                        <th>Merchant</th>
+                        <th>Amount</th>
+                        <th>Country</th>
+                        <th>Risk Score</th>
+                        <th>Risk Level</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="tx : ${transactions.content}">
+                        <td><span class="txn-id" th:text="${tx.transactionId}"></span></td>
+                        <td>
+                            <div style="font-size:0.82rem;font-weight:500;" th:text="${tx.customerName}"></div>
+                            <div style="font-size:0.68rem;color:var(--text-muted);" th:text="${tx.customerId}"></div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.82rem;" th:text="${tx.merchantName}"></div>
+                            <div style="font-size:0.68rem;color:var(--text-muted);" th:text="${tx.merchantCategory}"></div>
+                        </td>
+                        <td style="font-weight:600;" th:text="${#numbers.formatDecimal(tx.amount,1,2) + ' ' + tx.currency}"></td>
+                        <td>
+                            <span th:text="${tx.country}" style="font-size:0.82rem;"></span>
+                            <span th:if="${tx.highRiskCountry}" class="ms-1" style="font-size:0.65rem;color:var(--accent-red);" title="High-risk country"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        </td>
+                        <td>
+                            <div class="risk-bar-wrapper">
+                                <div class="risk-bar">
+                                    <div class="risk-bar-fill" th:attr="data-score=${tx.riskScore != null ? tx.riskScore : 0}"></div>
+                                </div>
+                                <div class="risk-bar-score" th:attr="data-score=${tx.riskScore != null ? tx.riskScore : 0}" th:text="${tx.riskScore != null ? tx.riskScore + '/100' : 'N/A'}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="risk-badge" th:if="${tx.riskLevel != null}" th:classappend="'risk-' + ${tx.riskLevel}" th:text="${tx.riskLevel}"></span>
+                            <span th:if="${tx.riskLevel == null}" style="color:var(--text-muted);font-size:0.75rem;">—</span>
+                        </td>
+                        <td>
+                            <span class="status-badge" th:classappend="'status-' + ${tx.status}" th:text="${tx.status}"></span>
+                        </td>
+                        <td style="font-size:0.72rem;color:var(--text-muted);" th:text="${#temporals.format(tx.transactionTime, 'dd MMM HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{/transactions/{id}(id=${tx.transactionId})}" class="btn-outline-custom" style="padding:4px 12px;font-size:0.72rem;">
+                                <i class="bi bi-search"></i> Investigate
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${transactions.content.isEmpty()}">
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <i class="bi bi-arrow-left-right"></i>
+                                <p>No transactions match your filters.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3" style="font-size:0.75rem;color:var(--text-secondary);">
+                <span th:text="'Page ' + (${currentPage}+1) + ' of ' + ${transactions.totalPages}"></span>
+                <div class="pagination-custom">
+                    <a th:href="@{/transactions(page=${currentPage-1},status=${selectedStatus},riskLevel=${selectedRiskLevel},search=${search})}"
+                       class="page-btn" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                    <a th:href="@{/transactions(page=${currentPage+1},status=${selectedStatus},riskLevel=${selectedRiskLevel},search=${search})}"
+                       class="page-btn" th:classappend="${currentPage + 1 >= transactions.totalPages} ? 'disabled'">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

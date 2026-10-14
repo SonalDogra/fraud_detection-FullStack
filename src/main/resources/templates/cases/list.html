@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Case Management')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Case Management</div>
+            <div class="topbar-breadcrumb">Investigate and resolve fraud cases</div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div th:if="${success}" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span></div>
+
+        <!-- Stats row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-label">Open Cases</div>
+                    <div class="stat-value text-accent-yellow" th:text="${stats.open}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-label">In Progress</div>
+                    <div class="stat-value text-accent-blue" th:text="${stats.inProgress}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-label">Resolved Fraud</div>
+                    <div class="stat-value text-accent-red" th:text="${stats.resolvedFraud}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-label">False Positives</div>
+                    <div class="stat-value text-accent-purple" th:text="${stats.falsePositive}">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card-dark mb-4">
+            <form method="get" th:action="@{/cases}" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <input type="text" name="search" th:value="${search}" class="form-control-dark w-100" placeholder="Search case ID or analyst..."/>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select-dark w-100">
+                        <option value="">All Statuses</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${selectedStatus == s.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="priority" class="form-select-dark w-100">
+                        <option value="">All Priorities</option>
+                        <option th:each="p : ${priorities}" th:value="${p}" th:text="${p}" th:selected="${selectedPriority == p.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn-primary-custom w-100 justify-content-center"><i class="bi bi-search"></i> Filter</button>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/cases}" class="btn-outline-custom w-100 justify-content-center">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="card-dark">
+            <div class="card-header-custom">
+                <div class="card-title">Fraud Cases <span class="card-subtitle ms-2" th:text="'(' + ${cases.totalElements} + ' total)'"></span></div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="table-dark-custom">
+                    <thead>
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Transaction</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="fc : ${cases.content}">
+                        <td><span class="txn-id" th:text="${fc.caseId}"></span></td>
+                        <td><span class="txn-id" style="font-size:0.72rem;" th:text="${fc.transaction.transactionId}"></span></td>
+                        <td style="font-size:0.82rem;" th:text="${fc.transaction.customerName}"></td>
+                        <td style="font-size:0.82rem;font-weight:600;" th:text="${#numbers.formatDecimal(fc.transaction.amount,1,2) + ' ' + fc.transaction.currency}"></td>
+                        <td>
+                            <span class="risk-badge" th:classappend="'risk-' + ${fc.priority}" th:text="${fc.priority}"></span>
+                        </td>
+                        <td>
+                            <span class="status-badge" th:classappend="'status-' + ${fc.transaction.status}" th:text="${fc.status}"></span>
+                        </td>
+                        <td style="font-size:0.8rem;" th:text="${fc.assignedTo}"></td>
+                        <td style="font-size:0.72rem;color:var(--text-muted);" th:text="${#temporals.format(fc.createdAt, 'dd MMM HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{/cases/{id}(id=${fc.caseId})}" class="btn-outline-custom" style="padding:4px 12px;font-size:0.72rem;">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${cases.content.isEmpty()}">
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <i class="bi bi-folder2"></i>
+                                <p>No cases found. Open cases from the Transaction Investigation page.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3" style="font-size:0.75rem;color:var(--text-secondary);">
+                <span th:text="'Page ' + (${currentPage}+1) + ' of ' + ${cases.totalPages}"></span>
+                <div class="pagination-custom">
+                    <a th:href="@{/cases(page=${currentPage-1})}" class="page-btn" th:classappend="${currentPage == 0} ? 'disabled'"><i class="bi bi-chevron-left"></i></a>
+                    <a th:href="@{/cases(page=${currentPage+1})}" class="page-btn" th:classappend="${currentPage + 1 >= cases.totalPages} ? 'disabled'"><i class="bi bi-chevron-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

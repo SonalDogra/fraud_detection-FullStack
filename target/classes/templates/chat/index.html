@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('AI Assistant')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">AI Analyst Assistant</div>
+            <div class="topbar-breadcrumb">Ask anything about transactions, risk scores, and fraud patterns</div>
+        </div>
+        <div class="ms-auto">
+            <span class="ai-badge"><i class="bi bi-robot"></i> Powered by AI</span>
+        </div>
+    </div>
+
+    <div class="page-content" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 56px);">
+        <div class="chat-messages" id="chatMessages">
+            <!-- Welcome message -->
+            <div class="message-ai">
+                <div class="message-sender">FraudGuard AI</div>
+                <div class="message-body">
+                    Welcome to FraudGuard AI Assistant. I can help you investigate transactions, understand risk scores, identify fraud patterns, and summarise case activity. What would you like to know?
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color);font-size:0.72rem;color:var(--text-secondary);">
+                        Platform stats — Total: <strong th:text="${stats.total}" style="color:var(--text-primary);"></strong> |
+                        High Risk: <strong th:text="${stats.highRisk}" style="color:var(--accent-red);"></strong> |
+                        Confirmed Fraud: <strong th:text="${stats.confirmedFraud}" style="color:var(--accent-yellow);"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="chat-suggestions">
+            <span class="suggestion-pill" onclick="useSuggestion('Why are transactions getting blocked?')">Why are transactions blocked?</span>
+            <span class="suggestion-pill" onclick="useSuggestion('Explain how the risk score is calculated')">How is risk score calculated?</span>
+            <span class="suggestion-pill" onclick="useSuggestion('What are the most common fraud patterns?')">Common fraud patterns</span>
+            <span class="suggestion-pill" onclick="useSuggestion('Summarize today\'s fraud activity')">Today\'s summary</span>
+            <span class="suggestion-pill" onclick="useSuggestion('How does the Fraud Similarity Engine work?')">Similarity engine</span>
+            <span class="suggestion-pill" onclick="useSuggestion('How do I generate an investigation report?')">Generate report</span>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+            <form id="chatForm" class="d-flex gap-2 w-100">
+                <input type="text" id="chatInput" class="form-control-dark flex-fill"
+                       placeholder="Ask about a transaction, risk score, fraud pattern..."
+                       autocomplete="off"/>
+                <button type="submit" class="btn-primary-custom" style="padding:8px 20px;">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

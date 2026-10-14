@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Case Detail')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" th:text="${fraudCase.caseId}"></div>
+            <div class="topbar-breadcrumb">
+                <a th:href="@{/cases}" style="color:var(--text-secondary);text-decoration:none;">Cases</a>
+                &rsaquo; <span th:text="${fraudCase.caseId}"></span>
+            </div>
+        </div>
+        <div class="ms-auto d-flex gap-2 align-items-center">
+            <span class="risk-badge" th:classappend="'risk-' + ${fraudCase.priority}" th:text="${fraudCase.priority}"></span>
+            <span class="status-badge" th:classappend="'status-' + ${fraudCase.transaction.status}" th:text="${fraudCase.status}"></span>
+            <a th:href="@{/reports/transaction/{id}/pdf(id=${fraudCase.transaction.transactionId})}"
+               class="btn-outline-custom" style="padding:6px 14px;font-size:0.78rem;" target="_blank">
+                <i class="bi bi-file-earmark-pdf"></i> Download PDF
+            </a>
+        </div>
+    </div>
+    <div class="page-content">
+        <div th:if="${success}" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span></div>
+        <div th:if="${error}" class="alert-custom alert-error"><i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span></div>
+
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <!-- Case info -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Case Information</div>
+                    <div class="d-flex flex-column gap-2" style="font-size:0.82rem;">
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Case ID</span>
+                            <span class="mono" th:text="${fraudCase.caseId}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Transaction</span>
+                            <a th:href="@{/transactions/{id}(id=${fraudCase.transaction.transactionId})}"
+                               class="txn-id" th:text="${fraudCase.transaction.transactionId}"></a>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Customer</span>
+                            <span th:text="${fraudCase.transaction.customerName}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Amount</span>
+                            <span style="font-weight:700;" th:text="${#numbers.formatDecimal(fraudCase.transaction.amount,1,2) + ' ' + fraudCase.transaction.currency}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Risk Score</span>
+                            <span style="font-weight:700;" th:text="${fraudCase.transaction.riskScore + '/100'}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Created By</span>
+                            <span th:text="${fraudCase.createdBy}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Assigned To</span>
+                            <span th:text="${fraudCase.assignedTo}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Opened</span>
+                            <span th:text="${#temporals.format(fraudCase.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between" th:if="${fraudCase.resolvedAt != null}">
+                            <span style="color:var(--text-secondary);">Resolved</span>
+                            <span th:text="${#temporals.format(fraudCase.resolvedAt, 'dd MMM yyyy HH:mm')}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update case -->
+                <div class="card-dark" th:if="${!fraudCase.status.name().startsWith('RESOLVED')}">
+                    <div class="section-title">Update Investigation</div>
+                    <form th:action="@{/cases/{id}/update(id=${fraudCase.caseId})}" method="post">
+                        <div class="mb-3">
+                            <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:6px;">Outcome</label>
+                            <select name="outcome" class="form-select-dark w-100">
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="FRAUD">Confirmed Fraud</option>
+                                <option value="LEGITIMATE">Legitimate</option>
+                                <option value="FALSE_POSITIVE">False Positive</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:6px;">Investigation Notes</label>
+                            <textarea name="notes" rows="4" class="form-control-dark w-100"
+                                      placeholder="Add your analysis notes..."
+                                      th:text="${fraudCase.notes}"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary-custom w-100 justify-content-center">
+                            <i class="bi bi-check-lg"></i> Update Case
+                        </button>
+                    </form>
+                </div>
+                <div class="card-dark" th:if="${fraudCase.status.name().startsWith('RESOLVED')}">
+                    <div class="section-title">Case Resolved</div>
+                    <div style="font-size:0.82rem;color:var(--text-secondary);" th:text="${fraudCase.notes != null ? fraudCase.notes : 'No notes added.'}"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <!-- AI Investigation Summary -->
+                <div class="card-dark mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">AI Investigation Summary</div>
+                        <span class="ai-badge"><i class="bi bi-robot"></i> AI Generated</span>
+                    </div>
+                    <div class="ai-summary" th:text="${fraudCase.investigationSummary != null ? fraudCase.investigationSummary : 'No AI summary available for this case.'}"></div>
+                </div>
+
+                <!-- Triggered rules -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Triggered Fraud Rules</div>
+                    <div th:if="${fraudCase.transaction.triggeredRules != null && !fraudCase.transaction.triggeredRules.isEmpty()}">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="rule : ${#strings.arraySplit(fraudCase.transaction.triggeredRules, ',')}"
+                                  class="risk-badge risk-HIGH" style="font-size:0.72rem;" th:text="${#strings.trim(rule)}"></span>
+                        </div>
+                    </div>
+                    <div th:if="${fraudCase.transaction.triggeredRules == null || fraudCase.transaction.triggeredRules.isEmpty()}">
+                        <span class="risk-badge risk-LOW">No rules triggered</span>
+                    </div>
+                </div>
+
+                <!-- Behaviour -->
+                <div class="card-dark">
+                    <div class="section-title">Behaviour Analysis</div>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7;margin:0;"
+                       th:text="${fraudCase.transaction.behaviourFindings != null ? fraudCase.transaction.behaviourFindings : 'No behaviour data available.'}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

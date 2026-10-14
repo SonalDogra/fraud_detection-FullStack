@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Investigate')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" th:text="${transaction.transactionId}"></div>
+            <div class="topbar-breadcrumb">
+                <a th:href="@{/transactions}" style="color:var(--text-secondary);text-decoration:none;">Transactions</a>
+                &rsaquo; Investigation
+            </div>
+        </div>
+        <div class="ms-auto d-flex gap-2 align-items-center">
+            <span class="risk-badge" th:if="${transaction.riskLevel != null}"
+                  th:classappend="'risk-' + ${transaction.riskLevel}"
+                  th:text="${transaction.riskLevel}"></span>
+            <a th:href="@{/reports/transaction/{id}/pdf(id=${transaction.transactionId})}"
+               class="btn-outline-custom" style="padding:6px 14px;font-size:0.78rem;" target="_blank">
+                <i class="bi bi-file-earmark-pdf"></i> Download PDF
+            </a>
+            <form th:action="@{/transactions/{id}/open-case(id=${transaction.transactionId})}" method="post" th:if="${!hasCase}">
+                <button type="submit" class="btn-primary-custom" style="padding:6px 14px;font-size:0.78rem;">
+                    <i class="bi bi-folder-plus"></i> Open Case
+                </button>
+            </form>
+            <a th:href="@{/cases}" th:if="${hasCase}" class="btn-outline-custom" style="padding:6px 14px;font-size:0.78rem;">
+                <i class="bi bi-folder2-open"></i> View Case
+            </a>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div th:if="${success}" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span></div>
+        <div th:if="${error}" class="alert-custom alert-error"><i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span></div>
+
+        <div class="row g-3">
+            <!-- LEFT COL -->
+            <div class="col-lg-4">
+                <!-- Risk Score -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Risk Assessment</div>
+                    <div class="text-center py-2">
+                        <div th:style="'font-size:3.5rem;font-weight:900;line-height:1;color:' + (${transaction.riskScore != null && transaction.riskScore >= 80} ? '#ef4444' : (${transaction.riskScore != null && transaction.riskScore >= 60} ? '#f97316' : (${transaction.riskScore != null && transaction.riskScore >= 35} ? '#f59e0b' : '#10b981')))"
+                             th:text="${transaction.riskScore != null ? transaction.riskScore : '?'}">0</div>
+                        <div style="font-size:0.72rem;color:var(--text-secondary);">/ 100</div>
+                        <span class="risk-badge mt-2 d-inline-flex" th:if="${transaction.riskLevel != null}"
+                              th:classappend="'risk-' + ${transaction.riskLevel}"
+                              th:text="${transaction.riskLevel}"></span>
+                    </div>
+                    <div class="risk-bar mt-2" style="height:10px;">
+                        <div class="risk-bar-fill" th:attr="data-score=${transaction.riskScore != null ? transaction.riskScore : 0}" style="height:10px;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1" style="font-size:0.65rem;color:var(--text-muted);">
+                        <span>Low</span><span>Medium</span><span>High</span><span>Critical</span>
+                    </div>
+                    <div th:if="${transaction.confidence != null}" class="mt-2" style="font-size:0.75rem;color:var(--text-secondary);">
+                        Confidence: <strong th:text="${#numbers.formatDecimal(transaction.confidence * 100, 1, 1) + '%'}" style="color:var(--text-primary);"></strong>
+                    </div>
+                </div>
+
+                <!-- Customer -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Customer</div>
+                    <div class="d-flex flex-column gap-2" style="font-size:0.82rem;">
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Name</span>
+                            <span th:text="${transaction.customerName}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">ID</span>
+                            <span class="mono" th:text="${transaction.customerId}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Email</span>
+                            <span th:text="${transaction.customerEmail}" style="font-size:0.75rem;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Merchant</div>
+                    <div class="d-flex flex-column gap-2" style="font-size:0.82rem;">
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Name</span>
+                            <span th:text="${transaction.merchantName}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Category</span>
+                            <span th:text="${transaction.merchantCategory}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Amount</span>
+                            <span style="font-weight:700;" th:text="${#numbers.formatDecimal(transaction.amount,1,2) + ' ' + transaction.currency}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device / Location -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Device &amp; Location</div>
+                    <div class="d-flex flex-column gap-2" style="font-size:0.82rem;">
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Country</span>
+                            <span th:text="${transaction.country}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">IP Address</span>
+                            <span class="mono" style="font-size:0.75rem;" th:text="${transaction.ipAddress}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Device</span>
+                            <span th:text="${transaction.deviceType}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-secondary);">Browser</span>
+                            <span th:text="${transaction.browser}"></span>
+                        </div>
+                        <hr class="divider"/>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span th:if="${transaction.vpn}" class="risk-badge risk-HIGH" style="font-size:0.62rem;">VPN/Proxy</span>
+                            <span th:if="${transaction.newDevice}" class="risk-badge risk-HIGH" style="font-size:0.62rem;">New Device</span>
+                            <span th:if="${transaction.highRiskCountry}" class="risk-badge risk-HIGH" style="font-size:0.62rem;">High-Risk Country</span>
+                            <span th:if="${transaction.foreignCurrency}" class="risk-badge risk-MEDIUM" style="font-size:0.62rem;">Foreign Currency</span>
+                            <span th:if="${transaction.roundAmount}" class="risk-badge risk-MEDIUM" style="font-size:0.62rem;">Round Amount</span>
+                            <span th:if="${!transaction.vpn && !transaction.newDevice && !transaction.highRiskCountry}" 
+                                  class="risk-badge risk-LOW" style="font-size:0.62rem;">Device Trusted</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COL -->
+            <div class="col-lg-8">
+                <!-- Triggered Rules -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Triggered Fraud Rules</div>
+                    <div th:if="${transaction.triggeredRules != null && !transaction.triggeredRules.isEmpty()}">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="rule : ${#strings.arraySplit(transaction.triggeredRules, ',')}"
+                                  class="risk-badge risk-HIGH" style="font-size:0.72rem;" th:text="${#strings.trim(rule)}"></span>
+                        </div>
+                    </div>
+                    <div th:if="${transaction.triggeredRules == null || transaction.triggeredRules.isEmpty()}">
+                        <span class="risk-badge risk-LOW">No rules triggered</span>
+                    </div>
+                </div>
+
+                <!-- Behaviour Findings -->
+                <div class="card-dark mb-3">
+                    <div class="section-title">Behaviour Intelligence</div>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7;margin:0;"
+                       th:text="${transaction.behaviourFindings != null ? transaction.behaviourFindings : 'No behaviour analysis available.'}"></p>
+                </div>
+
+                <!-- Recommended Action -->
+                <div class="card-dark mb-3" th:if="${transaction.recommendedAction != null}">
+                    <div class="section-title">Recommended Action</div>
+                    <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:14px;">
+                        <i class="bi bi-lightning-charge-fill text-accent-blue me-2"></i>
+                        <span style="font-size:0.84rem;color:var(--text-primary);" th:text="${transaction.recommendedAction}"></span>
+                    </div>
+                </div>
+
+                <!-- AI Investigation Report -->
+                <div class="card-dark mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="section-title mb-0">AI Investigation Report</div>
+                        <span class="ai-badge"><i class="bi bi-robot"></i> AI Generated</span>
+                    </div>
+                    <div class="ai-summary" th:text="${transaction.aiSummary != null ? transaction.aiSummary : 'AI investigation report will appear here after analysis.'}"></div>
+                </div>
+
+                <!-- Status + Time -->
+                <div class="card-dark">
+                    <div class="section-title">Status &amp; Timeline</div>
+                    <div class="row g-3" style="font-size:0.82rem;">
+                        <div class="col-6">
+                            <span style="color:var(--text-secondary);">Current Status</span><br/>
+                            <span class="status-badge mt-1" th:classappend="'status-' + ${transaction.status}" th:text="${transaction.status}"></span>
+                        </div>
+                        <div class="col-6">
+                            <span style="color:var(--text-secondary);">Transaction Time</span><br/>
+                            <span th:text="${#temporals.format(transaction.transactionTime, 'dd MMM yyyy HH:mm:ss')}"></span>
+                        </div>
+                        <div class="col-6" th:if="${transaction.analysedAt != null}">
+                            <span style="color:var(--text-secondary);">Analysed At</span><br/>
+                            <span th:text="${#temporals.format(transaction.analysedAt, 'dd MMM yyyy HH:mm:ss')}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

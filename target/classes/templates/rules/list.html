@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Rule Engine')}"></head>
+<body style="display:flex;">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Rule Engine</div>
+            <div class="topbar-breadcrumb">Configure and manage fraud detection rules</div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div th:if="${success}" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span></div>
+
+        <div class="card-dark">
+            <div class="card-header-custom">
+                <div>
+                    <div class="card-title">Fraud Detection Rules</div>
+                    <div class="card-subtitle">Enable, disable, and tune rule parameters</div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">
+                    <span th:text="${activeCount}"></span> of <span th:text="${#lists.size(rules)}"></span> rules active
+                </div>
+            </div>
+
+            <table class="table-dark-custom">
+                <thead>
+                <tr>
+                    <th>Active</th>
+                    <th>Rule Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Weight</th>
+                    <th>Threshold</th>
+                    <th>Risk Points</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rule : ${rules}">
+                    <td>
+                        <form th:action="@{/rules/{id}/toggle(id=${rule.id})}" method="post" style="display:inline;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" th:checked="${rule.enabled}" onchange="this.form.submit()"/>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </form>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;font-size:0.84rem;" th:text="${rule.name}"></div>
+                        <div class="mono" style="font-size:0.66rem;color:var(--text-muted);" th:text="${rule.code}"></div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-PENDING" style="font-size:0.62rem;" th:text="${rule.category}"></span>
+                    </td>
+                    <td style="font-size:0.78rem;color:var(--text-secondary);" th:text="${rule.description}"></td>
+                    <td>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;" th:text="${rule.weight}"></span>
+                    </td>
+                    <td>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;" th:text="${rule.threshold}"></span>
+                    </td>
+                    <td>
+                        <span class="risk-badge" th:classappend="${rule.riskPoints >= 30} ? 'risk-HIGH' : (${rule.riskPoints >= 20} ? 'risk-MEDIUM' : 'risk-LOW')"
+                              th:text="${rule.riskPoints}"></span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn-outline-custom" style="padding:4px 10px;font-size:0.72rem;"
+                                th:attr="data-id=${rule.id},data-weight=${rule.weight},data-threshold=${rule.threshold},data-points=${rule.riskPoints}"
+                                onclick="openEditModal(this)">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:28px;width:380px;max-width:90vw;">
+                <h5 style="font-size:0.9rem;font-weight:700;margin-bottom:20px;">Edit Rule Parameters</h5>
+                <form id="editForm" method="post">
+                    <div class="mb-3">
+                        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:6px;">Weight (0.0 – 1.0)</label>
+                        <input type="number" name="weight" id="editWeight" step="0.1" min="0" max="1" class="form-control-dark w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:6px;">Threshold</label>
+                        <input type="number" name="threshold" id="editThreshold" step="100" class="form-control-dark w-100"/>
+                    </div>
+                    <div class="mb-4">
+                        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:6px;">Risk Points</label>
+                        <input type="number" name="riskPoints" id="editPoints" min="1" max="100" class="form-control-dark w-100"/>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-primary-custom flex-fill justify-content-center">Save</button>
+                        <button type="button" class="btn-outline-custom flex-fill justify-content-center" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function openEditModal(btn) {
+                var id = btn.dataset.id;
+                document.getElementById('editForm').action = '/rules/' + id + '/update';
+                document.getElementById('editWeight').value = btn.dataset.weight;
+                document.getElementById('editThreshold').value = btn.dataset.threshold;
+                document.getElementById('editPoints').value = btn.dataset.points;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+            function closeModal() {
+                document.getElementById('editModal').style.display = 'none';
+            }
+        </script>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
